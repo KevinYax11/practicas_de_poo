@@ -1,27 +1,31 @@
+import { PostTitle } from './post-title';
+import { PostDescription } from './post-description';
+import { PostAuthor } from './post-author';
+
 export class Post {
     constructor(
-        public title: string,
-        public description: string,
-        public author: string
+        private title: PostTitle,
+        private description: PostDescription,
+        private author: PostAuthor
     ) {}
 
-    static isStringFields(title: any, description: any, author: any): boolean {
-        return typeof title === 'string' && typeof description === 'string' && typeof author === 'string';
+    static create(title: string, description: string, author: string): Post {
+        const postTitle = PostTitle.create(title);
+        const postDescription = PostDescription.create(description);
+        const postAuthor = PostAuthor.create(author);
+
+        return new Post(postTitle, postDescription, postAuthor);
     }
 
-    static isValidTitle(title: string): boolean {
-        const t = title.trim();
-        return t.length >= 5 && t.length <= 100;
+    getTitle(): string {
+        return this.title.getValue();
     }
 
-    static isValidDescription(description: string): boolean {
-        const d = description.trim();
-        return d.length >= 10 && d.length <= 500;
+    getDescription(): string {
+        return this.description.getValue();
     }
 
-    static isValidAuthor(author: string): boolean {
-        if (!author || author.trim().length === 0) return false;
-        const words = author.trim().split(" ");
-        return words.every(word => word[0] === word[0].toUpperCase());
+    getAuthor(): string {
+        return this.author.getValue();
     }
 }

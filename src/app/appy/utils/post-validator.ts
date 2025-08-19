@@ -1,23 +1,27 @@
-import { Post } from './post';
+import { PostTitle } from './post-title';
+import { PostDescription } from './post-description';
+import { PostAuthor } from './post-author';
 
 export class PostValidator {
     validate(title: string, description: string, author: string): { isValid: boolean; errors: string[] } {
         const errors: string[] = [];
 
-        if (!Post.isStringFields(title, description, author)) {
-            errors.push('Invalid data types. Title, description and author must be strings.');
+        try {
+            PostTitle.create(title);
+        } catch (error) {
+            errors.push(error instanceof Error ? error.message : 'Invalid Title');
         }
 
-        if (!Post.isValidTitle(title)) {
-            errors.push('Invalid Title. Must be between 5 and 100 characters.');
+        try {
+            PostDescription.create(description);
+        } catch (error) {
+            errors.push(error instanceof Error ? error.message : 'Invalid Description');
         }
 
-        if (!Post.isValidDescription(description)) {
-            errors.push('Invalid Description. Must be between 10 and 500 characters.');
-        }
-
-        if (!Post.isValidAuthor(author)) {
-            errors.push('Invalid Author. Each word must start with uppercase.');
+        try {
+            PostAuthor.create(author);
+        } catch (error) {
+            errors.push(error instanceof Error ? error.message : 'Invalid Author');
         }
 
         return {
