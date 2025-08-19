@@ -2,7 +2,7 @@ import postgres from 'postgres';
 import { NextResponse, NextRequest } from 'next/server';
 
 // Conexión a la base de datos
-const sql = postgres('postgresql://postgres.oholxxvzhdkelmjcgxpq:Kevin11-2003#@aws-1-us-east-2.pooler.supabase.com:6543/postgres');
+const sql = postgres('postgresql://postgres.oholxxvzhdkelmjcgxpq:cFZfgXDrI6tdwuIB@aws-1-us-east-2.pooler.supabase.com:6543/postgres');
 
 export async function POST(request: NextRequest) {
     const data = await request.json();
@@ -69,9 +69,9 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-        // Guardar en la base de datos
+        // Guardar en la base de datos 
         await sql`
-            INSERT INTO posts (title, description, author)
+            INSERT INTO post (title, description, author)
             VALUES (${data.title}, ${data.description}, ${data.author})
         `;
 
