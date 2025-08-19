@@ -1,6 +1,8 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { PostRegistrer } from './utils/post-register';
 import { PostValidator } from './utils/post-validator';
+import { PostRepositoryPostgres } from './utils/post-repository-postgres';
+// import { PostRepositoryInMemory } from './utils/post-repository-in-memory';
 
 export async function POST(request: NextRequest) {
     const data = await request.json();
@@ -12,8 +14,11 @@ export async function POST(request: NextRequest) {
     }
 
     const postValidator = new PostValidator();
-    const postRegistrer = new PostRegistrer(postValidator);
-    
+    const postRepository = new PostRepositoryPostgres();
+    // const postRepository = new PostRepositoryInMemory();
+
+    const postRegistrer = new PostRegistrer(postValidator, postRepository);
+
     const result = await postRegistrer.register(data.title, data.description, data.author);
 
     if (!result.success) {
