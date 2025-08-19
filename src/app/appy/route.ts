@@ -1,4 +1,8 @@
+import postgres from 'postgres';
 import { NextResponse, NextRequest } from 'next/server';
+
+// Conexión a la base de datos
+const sql = postgres('postgresql://postgres.oholxxvzhdkelmjcgxpq:Kevin11-2003#@aws-1-us-east-2.pooler.supabase.com:6543/postgres');
 
 export async function POST(request: NextRequest) {
     const data = await request.json();
@@ -28,7 +32,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
     }
 
-    //  Validación de la descripción 
+    // --- Validación de la descripción ---
     if (data.description.trim().length < 10 || data.description.trim().length > 500) {
         return NextResponse.json({
             message: 'Invalid Description. Must be between 10 and 500 characters.',
@@ -39,10 +43,8 @@ export async function POST(request: NextRequest) {
     // --- Validación del autor (sin regex) ---
     const authorTrimmed = data.author.trim();
     const authorWords = authorTrimmed.split(" ");
-
     let validAuthor = true;
 
-    // El autor debe tener al menos un nombre y cada palabra debe empezar con mayúscula
     if (authorTrimmed.length === 0) {
         validAuthor = false;
     } else {
@@ -61,14 +63,28 @@ export async function POST(request: NextRequest) {
 
     if (!validAuthor) {
         return NextResponse.json({
-            message: 'Invalid Author. Each word must start with uppercase and contain valid characters.',
+            message: 'Invalid Author. Each word must start with uppercase.',
             author: data.author
         }, { status: 400 });
     }
 
-    // --- Si todo es válido ---
-    return NextResponse.json({
-        message: 'Data is valid',
-        data
-    });
+    try {
+        // Guardar en la base de datos
+        await sql`
+            INSERT INTO posts (title, description, author)
+            VALUES (${data.title}, ${data.description}, ${data.author})
+        `;
+
+        return NextResponse.json({
+            message: 'Data is valid and saved successfully',
+            data
+        }, { status: 201 });
+
+    } catch (error) {
+        console.error('Database error:', error);
+        return NextResponse.json({
+            message: 'Error saving data to database',
+            error: String(error)
+        }, { status: 500 });
+    }
 }
