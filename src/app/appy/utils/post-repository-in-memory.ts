@@ -16,4 +16,13 @@ export class PostRepositoryInMemory implements PostRepositoryInterface {
     async findById(id: string): Promise<Post | null> {
         return this.posts[parseInt(id)] || null;
     }
+
+    async update(id: string, post: Post): Promise<void> {
+        const index = parseInt(id);
+        if (this.posts[index]) {
+            this.posts[index] = post;
+        } else {
+            throw new Error('Post not found');
+        }
+    }
 }

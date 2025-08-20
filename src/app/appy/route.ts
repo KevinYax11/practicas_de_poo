@@ -4,7 +4,6 @@ import { PostValidator } from './utils/post-validator';
 import { PostRepositoryPostgres } from './utils/post-repository-postgres';
 // import { PostRepositoryInMemory } from './utils/post-repository-in-memory';
 
-// 👉 Endpoint POST: crear un nuevo post
 export async function POST(request: NextRequest) {
     const data = await request.json();
 
@@ -16,7 +15,6 @@ export async function POST(request: NextRequest) {
 
     const postValidator = new PostValidator();
     const postRepository = new PostRepositoryPostgres();
-    // const postRepository = new PostRepositoryInMemory();
 
     const postRegistrer = new PostRegistrer(postValidator, postRepository);
 
@@ -57,6 +55,67 @@ export async function GET() {
         console.error(error);
         return NextResponse.json(
             { success: false, message: 'Error fetching posts' },
+            { status: 500 }
+        );
+    }
+}
+
+// 👉 Nuevo método PUT
+export async function PUT(request: NextRequest) {
+    const data = await request.json();
+
+    if (!data || !data.id || !data.title || !data.description || !data.author) {
+        return NextResponse.json({
+            message: 'Missing required fields: id, title, description, author'
+        }, { status: 400 });
+    }
+
+    const postValidator = new PostValidator();
+    const validation = postValidator.validate(data.title, data.description, data.author);
+
+    if (!validation.isValid) {
+        return NextResponse.json({
+            message: 'Validation failed',
+            errors: validation.errors
+        }, { status: 400 });
+    }
+
+    try {
+        const postRepository = new PostRepositoryPostgres();
+        const post = await postRepository.findById(data.id);
+
+        if (!post) {
+            return NextResponse.json({
+                message: 'Post not found'
+            }, { status: 404 });
+        }
+
+        const updatedPost = PostRegistrer.prototype['constructor'] // solo usamos la lógica de creación
+            ? PostRegistrer.prototype
+            : null; // workaround si no usás un caso de uso
+
+        // mejor usamos Post.create directamente:
+        const newPost = (await import('./utils/post')).Post.create(
+            data.title,
+            data.description,
+            data.author
+        );
+
+        await postRepository.update(data.id, newPost);
+
+        return NextResponse.json({
+            message: 'Post updated successfully',
+            data: {
+                id: data.id,
+                title: data.title,
+                description: data.description,
+                author: data.author
+            }
+        }, { status: 200 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            { success: false, message: 'Error updating post' },
             { status: 500 }
         );
     }
