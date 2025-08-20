@@ -4,6 +4,7 @@ import { PostValidator } from './utils/post-validator';
 import { PostRepositoryPostgres } from './utils/post-repository-postgres';
 // import { PostRepositoryInMemory } from './utils/post-repository-in-memory';
 
+// 👉 Endpoint POST: crear un nuevo post
 export async function POST(request: NextRequest) {
     const data = await request.json();
 
@@ -36,4 +37,27 @@ export async function POST(request: NextRequest) {
             author: data.author
         }
     }, { status: 201 });
+}
+
+export async function GET() {
+    try {
+        const postRepository = new PostRepositoryPostgres();
+        const posts = await postRepository.findAll();
+
+        return NextResponse.json({
+            success: true,
+            data: posts.map(post => ({
+                id: post.getId(),
+                title: post.getTitle(),
+                description: post.getDescription(),
+                author: post.getAuthor()
+            }))
+        });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            { success: false, message: 'Error fetching posts' },
+            { status: 500 }
+        );
+    }
 }

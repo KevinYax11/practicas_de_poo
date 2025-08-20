@@ -3,7 +3,8 @@ import { PostDescription } from './post-description';
 import { PostAuthor } from './post-author';
 
 export class Post {
-    constructor(
+    private constructor(
+        private id: string | null,
         private title: PostTitle,
         private description: PostDescription,
         private author: PostAuthor
@@ -14,7 +15,20 @@ export class Post {
         const postDescription = PostDescription.create(description);
         const postAuthor = PostAuthor.create(author);
 
-        return new Post(postTitle, postDescription, postAuthor);
+        return new Post(null, postTitle, postDescription, postAuthor);
+    }
+
+    static withId(id: string, title: string, description: string, author: string): Post {
+        return new Post(
+            id,
+            PostTitle.create(title),
+            PostDescription.create(description),
+            PostAuthor.create(author)
+        );
+    }
+
+    getId(): string | null {
+        return this.id;
     }
 
     getTitle(): string {
