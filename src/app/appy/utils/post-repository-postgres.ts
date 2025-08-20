@@ -37,4 +37,13 @@ export class PostRepositoryPostgres {
             throw new Error('Post not found');
         }
     }
+
+    async delete(id: string): Promise<void> {
+        const result = await this.sql`
+            DELETE FROM post WHERE id = ${id} RETURNING id
+        `;
+        if (result.rowCount === 0) {
+            throw new Error('Post not found');
+        }
+    }
 }

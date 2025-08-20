@@ -60,7 +60,6 @@ export async function GET() {
     }
 }
 
-// 👉 Nuevo método PUT
 export async function PUT(request: NextRequest) {
     const data = await request.json();
 
@@ -90,12 +89,8 @@ export async function PUT(request: NextRequest) {
             }, { status: 404 });
         }
 
-        const updatedPost = PostRegistrer.prototype['constructor'] // solo usamos la lógica de creación
-            ? PostRegistrer.prototype
-            : null; // workaround si no usás un caso de uso
-
-        // mejor usamos Post.create directamente:
-        const newPost = (await import('./utils/post')).Post.create(
+        const { Post } = await import('./utils/post');
+        const newPost = Post.create(
             data.title,
             data.description,
             data.author
@@ -116,6 +111,40 @@ export async function PUT(request: NextRequest) {
         console.error(error);
         return NextResponse.json(
             { success: false, message: 'Error updating post' },
+            { status: 500 }
+        );
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    const { id } = await request.json();
+
+    if (!id) {
+        return NextResponse.json({
+            message: 'Missing required field: id'
+        }, { status: 400 });
+    }
+
+    try {
+        const postRepository = new PostRepositoryPostgres();
+        const post = await postRepository.findById(id);
+
+        if (!post) {
+            return NextResponse.json({
+                message: 'Post not found'
+            }, { status: 404 });
+        }
+
+        await postRepository.delete(id);
+
+        return NextResponse.json({
+            message: 'Post deleted successfully',
+            id
+        }, { status: 200 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            { success: false, message: 'Error deleting post' },
             { status: 500 }
         );
     }
